@@ -31,7 +31,7 @@ CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
-uint256 hashGenesisBlock("5c288e9d4f792ee8c87fc11cf3c8ee5be5e83d5c8c20dfd0c758cd7c576d8201");
+uint256 hashGenesisBlock("0x00000f31a5ba0b54b81d1b5e25c2e5615cdcab84bce2b4d4a799767c1842d901");
 
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // child: starting difficulty is 1 / 2^12
 CBlockIndex* pindexGenesisBlock = NULL;
@@ -3120,20 +3120,39 @@ bool InitBlockIndex() {
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1410279115;
+        block.nTime    = 1410348354;
         block.nBits    = 0x1e0ffff0;
-        block.nNonce   = 488191;
+        block.nNonce   = 466655;
 
         if (fTestNet)
         {
-	    pszTimestamp = "Save the children DCG";
-            block.nTime    = 1410299467;
+            block.nTime    = 0;
             block.nNonce   = 0;
         }
+        if (true  && (block.GetHash() != hashGenesisBlock)) {
+
+        // This will figure out a valid hash and Nonce if you're
+        // creating a different genesis block:
+            uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
+            while (block.GetHash() > hashTarget)
+               {
+                   ++block.nNonce;
+                   if (block.nNonce == 0)
+                   {
+                       printf("NONCE WRAPPED, incrementing time");
+                       ++block.nTime;
+                   }
+               }
+        }
+        block.print();
+        printf("block.GetHash() == %s\n", block.GetHash().ToString().c_str());
+        printf("block.hashMerkleRoot == %s\n", block.hashMerkleRoot.ToString().c_str());
+        printf("block.nTime = %u \n", block.nTime);
+        printf("block.nNonce = %u \n", block.nNonce);
        //// debug print
         uint256 hash = block.GetHash();
         block.print();
-        assert(block.hashMerkleRoot == uint256("ed5e83e2dfe7b09d09acdfecd39faf444eefee790eee11498eaa92c1ffac6782"));
+        assert(block.hashMerkleRoot == uint256("0xed5e83e2dfe7b09d09acdfecd39faf444eefee790eee11498eaa92c1ffac6782"));
         assert(hash == hashGenesisBlock);
         printf("%s\n", hash.ToString().c_str());
         printf("%s\n", hashGenesisBlock.ToString().c_str());
